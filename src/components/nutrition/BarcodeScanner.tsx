@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { ScanLine, X, Camera } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -123,7 +122,7 @@ const BarcodeScanner: React.FC = () => {
       const videoInputDevices = await codeReader.current.listVideoInputDevices();
 
       // if (videoInputDevices.length === 0) {
-      //   throw new Error('No camera devices found');
+      //  throw new Error('No camera devices found');
       // }
 
       if (videoInputDevices.length === 0) {
@@ -155,8 +154,8 @@ const BarcodeScanner: React.FC = () => {
         videoRef.current,
 
         // controls.current = await codeReader.current.decodeFromVideoDevice(
-        //   selectedDeviceId,
-        //   videoRef.current,
+        //  selectedDeviceId,
+        //  videoRef.current,
         async (result, error) => {
           if (result) {
 
@@ -254,7 +253,7 @@ const BarcodeScanner: React.FC = () => {
         size="icon"
         onClick={handleOpenDialog}
         className="h-10 w-10 rounded-full hover:bg-accent"
-        title="Scan Barcode"
+        title="ScanBar" // MODIFIED
       >
         <ScanLine className="h-5 w-5" />
       </Button>
@@ -263,7 +262,7 @@ const BarcodeScanner: React.FC = () => {
         {/* Increase default rounding on the dialog itself */}
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Scan Barcode</DialogTitle>
+            <DialogTitle>ScanBar</DialogTitle> {/* MODIFIED */}
           </DialogHeader>
 
           <div className="space-y-4">
@@ -296,7 +295,8 @@ const BarcodeScanner: React.FC = () => {
                   />
 
                   {/* content */}
-                  <div className="relative space-y-3 ">
+                  {/* MODIFIED: Added max-h-64 for height limit and overflow-y-auto for scrolling */}
+                  <div className="relative space-y-3 max-h-64 overflow-y-auto pr-2">
                     {nutritionData?.map(({ label, value }) => (
                       <motion.div
                         key={label}
