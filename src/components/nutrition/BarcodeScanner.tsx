@@ -2,12 +2,20 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { ScanLine, X, Camera } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { BrowserMultiFormatReader } from '@zxing/library';
+import {
+  BrowserMultiFormatReader,
+  DecodeHintType,
+  BarcodeFormat,
+} from '@zxing/library';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useHealthStore } from '@/store/healthStore';
 import { useIsMobile } from '@/hooks/use-mobile';
+
+// Backend base URL
+// Safely access Vite environment variable
+const API_URL = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:4000/api';
 
 interface BarcodeScannerProps {
   onScanResult: (barcode: string) => void;
@@ -31,6 +39,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScanResult }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [demoStatus, setDemoStatus] = useState<'idle' | 'loading' | 'done'>('idle');
+  const [nutritionData, setNutritionData] = useState<Array<{ label: string; value: string }> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const codeReader = useRef<BrowserMultiFormatReader | null>(null);
   const controls = useRef<any>(null);
@@ -82,8 +91,25 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScanResult }) => {
       setError(null);
       setIsScanning(true);
 
-      // Create a new code reader
-      codeReader.current = new BrowserMultiFormatReader();
+            // Build decode hints to support common barcode formats
+      const hints = new Map();
+      const formats = [
+        BarcodeFormat.QR_CODE,
+        BarcodeFormat.DATA_MATRIX,
+        BarcodeFormat.UPC_A,
+        BarcodeFormat.UPC_E,
+        BarcodeFormat.EAN_13,
+        BarcodeFormat.EAN_8,
+        BarcodeFormat.CODE_39,
+        BarcodeFormat.CODE_128,
+        BarcodeFormat.ITF,
+        BarcodeFormat.PDF_417,
+        BarcodeFormat.AZTEC,
+      ];
+      hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
+
+      // Create a new code reader with hints
+      codeReader.current = new BrowserMultiFormatReader(hints);
 
       // Get video devices
       const videoInputDevices = await codeReader.current.listVideoInputDevices();
@@ -109,13 +135,42 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScanResult }) => {
       controls.current = await codeReader.current.decodeFromVideoDevice(
         selectedDeviceId,
         videoRef.current,
-        (result, error) => {
+        async (result, error) => {
           if (result) {
             clearTimeout(fallbackTimer);
             const barcodeText = result.getText();
             console.log('Barcode scanned:', barcodeText);
             
-            onScanResult(barcodeText);
+            // Notify callback (if provided)
+            onScanResult?.(barcodeText);
+
+            // Begin backend lookup
+            setDemoStatus('loading');
+            try {
+              const response = await fetch(`${API_URL}/auth/BarcodeSearchResult`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ barcodeNumber: barcodeText }),
+              });
+
+              const data = await response.json();
+              if (!data.success) {
+                throw new Error(data.message || 'Failed to fetch nutrition data');
+              }
+
+              setNutritionData(data.data);
+              setDemoStatus('done');
+              setIsOpen(true);
+            } catch (fetchErr) {
+              console.error('Backend error:', fetchErr);
+              toast({
+                title: 'Scan Error',
+                description: 'Failed to retrieve nutrition info. Please try again.',
+                variant: 'destructive',
+              });
+              setDemoStatus('idle');
+              setIsOpen(false);
+            }
             
             toast({
               title: "Barcode Scanned",
@@ -215,7 +270,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScanResult }) => {
 
                   {/* content */}
                   <div className="relative space-y-3">
-                    {DEMO_NUTRITION.map(({ label, value }) => (
+                    {(nutritionData ?? DEMO_NUTRITION).map(({ label, value }) => (
                       <motion.div
                         key={label}
                         initial={{ opacity: 0, x: -20 }}
@@ -291,14 +346,6 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScanResult }) => {
                     {isScanning ? 'Scanning...' : 'Start Scanning'}
                   </Button>
 
-                  <Button
-                    variant="secondary"
-                    className="flex-1"
-                    onClick={handleDemoClick}
-                    disabled={demoStatus === 'loading'}
-                  >
-                    Demo Nutrition
-                  </Button>
 
                   <Button
                     variant="outline"
