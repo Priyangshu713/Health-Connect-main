@@ -39,8 +39,8 @@ const DEMO_NUTRITION = [
 ];
 
 // { onScanResult }
-{/* <BarcodeScannerProps>  */}
-const BarcodeScanner: React.FC= () => {
+{/* <BarcodeScannerProps>  */ }
+const BarcodeScanner: React.FC = () => {
   const { toast } = useToast();
   const { geminiTier } = useHealthStore();
   const isMobile = useIsMobile();
@@ -51,7 +51,7 @@ const BarcodeScanner: React.FC= () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const codeReader = useRef<BrowserMultiFormatReader | null>(null);
   const controls = useRef<any>(null);
-  const [nutritionData, setNutritionData ]= useState<any>(null);
+  const [nutritionData, setNutritionData] = useState<any>(null);
 
   // Define stopScanning function using function declaration so it's hoisted
   function stopScanning() {
@@ -133,7 +133,21 @@ const BarcodeScanner: React.FC= () => {
 
       // Use the back camera if available (usually the first one on mobile)
       // const selectedDeviceId = videoInputDevices[0]?.deviceId;
-      const selectedDeviceId = videoInputDevices[0]?.deviceId;
+      // const selectedDeviceId = videoInputDevices[0]?.deviceId;
+      // Prefer the rear-facing (environment) camera when possible
+      let selectedDeviceId: string | undefined;
+      if (videoInputDevices.length > 1) {
+        // Try to find a device whose label hints it is the back/rear camera
+        const rearCam = videoInputDevices.find((d) => /back|rear|environment/i.test(d.label));
+        selectedDeviceId = rearCam ? rearCam.deviceId : undefined;
+      }
+      // Fallbacks
+      if (!selectedDeviceId) {
+        // On many phones the last device is the rear camera, so prefer that if multiple
+        selectedDeviceId = videoInputDevices[videoInputDevices.length - 1]?.deviceId || videoInputDevices[0].deviceId;
+      }
+
+
 
       // Start decoding from the video element
       controls.current = await codeReader.current.decodeFromVideoDevice(
