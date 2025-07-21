@@ -9,65 +9,45 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bot, Sparkles, Zap, Cpu, Brain, Lock } from 'lucide-react';
+import { Bot, Zap, Cpu, Brain, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 
 const GEMINI_MODELS: GeminiModelOption[] = [
   {
-    id: "gemini-1.5-flash",
-    name: "Gemini 1.5 Flash",
-    description: "Fast responses, good for general health questions",
-    isPremium: false
+    id: "gemini-2.5-flash-lite-preview-06-17",
+    name: "Gemini 2.5 Flash Lite",
+    description: "Fastest responses with efficient compute",
+    isPremium: false,
   },
   {
-    id: "gemini-2.0-flash",
-    name: "Gemini 2.0 Flash",
-    description: "Latest general purpose model with improved capabilities",
-    isPremium: false
-  },
-  {
-    id: "gemini-2.0-pro-exp-02-05",
-    name: "Gemini 2.0 Pro",
-    description: "Enhanced reasoning and detailed medical information",
-    isPremium: true
-  },
-  {
-    id: "gemini-2.0-flash-lite",
-    name: "Gemini 2.0 Flash Lite",
-    description: "Faster responses, lower resource usage",
-    isPremium: false
+    id: "gemini-2.5-flash",
+    name: "Gemini 2.5 Flash",
+    description: "Latest general-purpose model with improved capabilities",
+    isPremium: false,
   },
   {
     id: "gemini-2.0-flash-thinking-exp-01-21",
     name: "Gemini 2.0 Flash Thinking",
     description: "Advanced reasoning with step-by-step thinking process",
-    isPremium: true
+    isPremium: true,
   },
-  {
-    id: "gemini-2.5-pro-exp-03-25",
-    name: "Gemini 2.5 Pro",
-    description: "Latest premium model with advanced reasoning and medical knowledge",
-    isPremium: true
-  }
 ];
+
 
 const ModelIcon = ({ model }: { model: GeminiModelType }) => {
   switch (model) {
-    case "gemini-2.0-pro-exp-02-05":
-      return <Sparkles className="h-5 w-5 text-yellow-500" />;
-    case "gemini-2.0-flash":
+    case "gemini-2.5-flash":
       return <Zap className="h-5 w-5 text-health-sky" />;
-    case "gemini-2.0-flash-lite":
+    case "gemini-2.5-flash-lite-preview-06-17":
       return <Cpu className="h-5 w-5 text-health-mint" />;
     case "gemini-2.0-flash-thinking-exp-01-21":
       return <Brain className="h-5 w-5 text-purple-500" />;
-    case "gemini-2.5-pro-exp-03-25":
-      return <Sparkles className="h-5 w-5 text-amber-600" />;
     default:
       return <Bot className="h-5 w-5 text-health-lavender" />;
   }
 };
+
 
 const GeminiModelSelector: React.FC = () => {
   const { geminiApiKey, geminiModel, setGeminiModel, geminiTier } = useHealthStore();
