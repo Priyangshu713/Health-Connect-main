@@ -123,7 +123,7 @@ const GeminiModelSelector: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 {GEMINI_MODELS.map((model) => (
-                  <SelectItem 
+                  <SelectItem textValue={model.name} 
                     key={model.id} 
                     value={model.id}
                     disabled={(model.isPremium && !isPremiumUser) || isFreeUser}
