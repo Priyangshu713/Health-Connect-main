@@ -34,11 +34,11 @@ const changelogData: ChangelogItem[] = [
         version: '5.0.0',
         items: [
             {
-                text: 'Added "ScanBar" Feature for to get nutritional value of a food item by scanning it\'s barcode.',
+                text: 'Added "ScanBar" Feature for to get nutritional value of a food item by scanning it\'s barcode. Available to all Pro users on nutrition page.',
                 type: 'feature'
             },
             {
-                text: 'Updated previous AI models to new AI models ',
+                text: 'Updated previous AI models to new AI models. ',
                 type: 'improvement'
             },
             {
