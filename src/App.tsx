@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { useState, useEffect, useRef } from 'react';
-import { Analytics } from "@vercel/analytics/react"; // Import Analytics
+import { Analytics } from "@vercel/analytics/react"; // Vercel Analytics
+import { SpeedInsights } from "@vercel/speed-insights/react"; // Vercel Speed Insights
 import { toast } from "@/components/ui/use-toast";
 import Navbar from './components/Navbar';
 import Index from './pages/Index';
@@ -153,15 +154,15 @@ function App() {
                 } />
                 <Route path="/doctor/:id" element={
                   <ProtectedRoute publicPaths={publicPaths}>
-                    <DoctorDetails  />
+                    <DoctorDetails />
                   </ProtectedRoute>
                 } />
                 {// Temporarily disabled Doctor Portal
-                <Route path="/doctor-portal" element={
-                  <ProtectedRoute publicPaths={publicPaths}>
-                    <DoctorPortal />
-                  </ProtectedRoute>
-                } />
+                  <Route path="/doctor-portal" element={
+                    <ProtectedRoute publicPaths={publicPaths}>
+                      <DoctorPortal />
+                    </ProtectedRoute>
+                  } />
                 }
                 <Route path="/terms-privacy" element={
                   <ProtectedRoute publicPaths={publicPaths}>
@@ -185,7 +186,8 @@ function App() {
             <div id="modal-root" ref={modalRootRef}></div>
             <UpdateNotification />
           </div>
-          <Analytics /> {/* Add Analytics component here */}
+          <Analytics /> {/* Vercel Analytics component */}
+          <SpeedInsights /> {/* Vercel Speed Insights component */}
         </Router>
       )}
     </>
