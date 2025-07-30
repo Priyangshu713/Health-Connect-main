@@ -29,7 +29,7 @@ const AboutPage = () => {
         {
       name: "Tarak Nath Jana",
       role: "Backend, Data Collection, API calling",
-      description: "Responsible for building backend infrastructure with API callings.",
+      description: "Responsible for implementing the 'ScanBar' feature to the website. Responsible for building backend infrastructure with API callings.",
       image: "https://avatars.githubusercontent.com/u/140452004?v=4",
       github: "https://github.com/tarakNathJ/",
       linkedin: "https://www.linkedin.com/in/tarak-nath-jana-7411a0301/" 
