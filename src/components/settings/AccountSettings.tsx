@@ -22,7 +22,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import { getUserProfile, updateUserProfile, synchronizeTier, updateProfileImage, deleteUserAccount, updateUserTier, cancelSubscription } from '@/api/auth';
+import { getUserProfile, updateUserProfile, synchronizeTier, updateProfileImage, deleteUserAccount, updateUserTier, cancelSubscription, getSubscriptionDetails } from '@/api/auth';
 import { useHealthStore } from '@/store/healthStore';
 
 // Form schema
@@ -68,6 +68,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ isOpen, onClose }) =>
     const [cancelPassword, setCancelPassword] = useState('');
     const [isCancelling, setIsCancelling] = useState(false);
     const [cancelError, setCancelError] = useState('');
+    const [subscriptionDetails, setSubscriptionDetails] = useState<{ amount: number; currency: string; nextBillingDate: string; daysLeft: number } | null>(null);
 
     // Helper to compare tiers – higher number means higher tier
     const tierRank = { free: 0, lite: 1, pro: 2 } as const;
@@ -106,6 +107,21 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ isOpen, onClose }) =>
     useEffect(() => {
         if (showPaymentDetails) {
             setPaymentStep('details');
+            // Fetch latest subscription details
+            (async () => {
+                try {
+                    const details = await getSubscriptionDetails();
+                    setSubscriptionDetails(details);
+                    // If backend downgraded to free, update local tier
+                    if (details.plan && details.plan !== profileData?.tier) {
+                        setProfileData(prev => prev ? { ...prev, tier: details.plan } : prev);
+                        localStorage.setItem('geminiTier', details.plan);
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch subscription details:', err);
+                    setSubscriptionDetails(null);
+                }
+            })();
             if (profileData) {
                 setSelectedTier(profileData.tier);
             }
@@ -854,8 +870,10 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ isOpen, onClose }) =>
 
                             <div className="space-y-3 py-2 text-sm">
                                 <p><span className="font-medium">Current Plan:</span> {getTierName(profileData?.tier || 'free')}</p>
-                                <p><span className="font-medium">Amount Billed:</span> —</p>
-                                <p><span className="font-medium">Next Billing Date:</span> —</p>
+                                <p><span className="font-medium">Amount Billed:</span> {subscriptionDetails ? `${subscriptionDetails.currency === 'INR' ? '₹' : subscriptionDetails.currency}${subscriptionDetails.amount.toFixed(2)}` : '—'}</p>
+                                <p><span className="font-medium">Next Billing Date:</span> {subscriptionDetails ? `${format(new Date(subscriptionDetails.nextBillingDate), 'MMMM d, yyyy')}` : '—'}
+                                    {subscriptionDetails ? <span className="ml-2 text-xs text-muted-foreground">({subscriptionDetails.daysLeft} days left)</span> : null}
+                                </p>
                                 <p className="text-muted-foreground text-xs">Detailed billing history will be available soon.</p>
                             </div>
                             <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
@@ -878,11 +896,26 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ isOpen, onClose }) =>
 
                             <RadioGroup value={selectedTier} onValueChange={value => setSelectedTier(value as 'free' | 'lite' | 'pro')} className="space-y-3">
                                 {tierOptions.map(option => (
-                                    <div key={option.value} className="flex items-center gap-3 p-3 border rounded-md">
-                                        <RadioGroupItem value={option.value} id={`tier-${option.value}`} />
-                                        <label htmlFor={`tier-${option.value}`} className="flex flex-col">
-                                            <span className="font-medium">{option.label}</span>
-                                            <span className="text-sm text-muted-foreground">{option.price}</span>
+                                    <div
+                                        key={option.value}
+                                        className={`flex items-start gap-4 p-5 rounded-lg cursor-pointer w-full transition
+                                            ${selectedTier === option.value ? 'border-2 border-primary bg-primary/5 shadow-lg' : 'border hover:border-primary/60'}`}
+                                    >
+                                        <RadioGroupItem value={option.value} id={`tier-${option.value}`} className="sr-only" />
+                                        <label htmlFor={`tier-${option.value}`} className="flex items-center gap-4 w-full cursor-pointer">
+                                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/10 text-primary flex-shrink-0">
+                                                {option.value === 'pro' ? (
+                                                    <Crown className="h-5 w-5" />
+                                                ) : option.value === 'lite' ? (
+                                                    <Zap className="h-5 w-5" />
+                                                ) : (
+                                                    <ShieldCheck className="h-5 w-5" />
+                                                )}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold">{option.label}</span>
+                                                <span className="text-xs text-muted-foreground">{option.price}</span>
+                                            </div>
                                         </label>
                                     </div>
                                 ))}
@@ -898,35 +931,19 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ isOpen, onClose }) =>
                                 </ul>
                             </div>
 
-                            {profileData?.tier !== 'free' && (
-                                <p className="text-xs text-center text-muted-foreground mt-4">
-                                    <button type="button" onClick={() => setPaymentStep('cancel')} className="underline">Cancel Subscription?</button>
-                                </p>
-                            )}
-
-                            <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
-                                <Button variant="outline" onClick={() => setPaymentStep('details')} className="w-full sm:w-auto">
-                                    Back
-                                </Button>
-                                <div className="flex items-center gap-1 w-full sm:w-auto">
-                                    <Button disabled={isUpdatingTier || selectedTier === profileData?.tier || isDowngradeAttempt} onClick={handleUpdateTier} className="w-full sm:w-auto">
-                                        {isUpdatingTier ? 'Updating...' : 'Update Plan'}
+                            <DialogFooter className="flex justify-between items-center mt-6">
+                                {profileData?.tier !== 'free' && (
+                                    <Button
+                                        type="button"
+                                        variant="link"
+                                        size="sm"
+                                        onClick={() => setPaymentStep('cancel')}
+                                        className="text-xs p-0 m-0 text-muted-foreground underline order-first"
+                                    >
+                                        Cancel Subscription?
                                     </Button>
-                                    {isDowngradeAttempt && (
-                                        <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <button type="button" className="text-muted-foreground p-1">
-                                                        <Info className="h-4 w-4" />
-                                                    </button>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="top">
-                                                    <span>You cannot downgrade your subscription from {getTierName(profileData?.tier || 'free')}.</span>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    )}
-                                </div>
+                                )}
+                                <Button variant="outline" onClick={() => setPaymentStep('details')}>Back</Button>
                             </DialogFooter>
                         </>
                     )}

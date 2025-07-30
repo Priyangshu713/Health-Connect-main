@@ -15,7 +15,7 @@ export interface GeminiRecommendation {
 export const fetchRecommendationsFromGemini = async (
   healthData: HealthData, 
   apiKey: string,
-  modelType: GeminiModelType = "gemini-1.5-flash"
+  modelType: GeminiModelType = "gemini-2.5-flash-lite-preview-06-17"
 ): Promise<GeminiRecommendation[]> => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);

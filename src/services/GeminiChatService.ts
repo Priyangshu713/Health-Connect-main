@@ -26,7 +26,7 @@ const formatGeminiResponse = (text: string): string => {
   formattedText = formattedText.replace(/^\s*\*\*([^*:]+):\*\*/gm, '<h4 class="font-bold text-primary mt-2 mb-1">$1:</h4>');
 
   // Handle bullet points (lines starting with - or *)
-  formattedText = formattedText.replace(/^\s*[\-\*]\s+(.+)$/gm, '<li>$1</li>');
+  formattedText = formattedText.replace(/^\s*[-*]\s+(.+)$/gm, '<li>$1</li>');
 
   // Wrap lists in <ul> tags
   formattedText = formattedText.replace(/(<li>.*<\/li>)(?!\s*<\/ul>)/gs, '<ul class="list-disc pl-5 my-2">$1</ul>');
@@ -45,7 +45,7 @@ const formatGeminiResponse = (text: string): string => {
   return formattedText;
 };
 
-export const createGeminiChatSession = (apiKey: string, modelType: GeminiModelType = "gemini-1.5-flash") => {
+export const createGeminiChatSession = (apiKey: string, modelType: GeminiModelType = "gemini-2.5-flash-lite-preview-06-17") => {
   // Validate API key
   if (!apiKey || apiKey.trim() === '') {
     console.error("No API key provided to Gemini service");
@@ -71,7 +71,7 @@ export const createGeminiChatSession = (apiKey: string, modelType: GeminiModelTy
   });
 
   // Check if this is a thinking model that should show its thought process
-  const isThinkingModel = modelType.includes("thinking") || modelType === "gemini-2.5-pro-exp-03-25";
+  const isThinkingModel = modelType.includes("thinking");
 
   // Adjust generation config based on model
   const generationConfig = {
@@ -98,21 +98,8 @@ export const createGeminiChatSession = (apiKey: string, modelType: GeminiModelTy
       },
     ];
 
-    // Special handling for Gemini 2.5 Pro model
-    if (modelType === "gemini-2.5-pro-exp-03-25") {
-      initialHistory.push({
-        role: "user",
-        parts: [
-          { text: "When responding to health questions, I'd like you to show your thinking process. First, think through the question step by step using available medical knowledge. Label this section as 'THINKING PROCESS:'. When you're ready to provide the actual response, use the exact phrase 'RESPONSE_BEGINS_HEALTH_CONNECT:' to indicate where your formal answer starts. This will help me understand how you arrive at your health guidance. Use Markdown formatting in your answer section: use **bold** for important terms and section titles." }]
-      });
-      initialHistory.push({
-        role: "model",
-        parts: [
-          { text: "I understand. For health-related questions, I'll structure my responses in two parts:\n\n1. THINKING PROCESS: Where I'll analyze the question systematically using medical knowledge.\n2. RESPONSE_BEGINS_HEALTH_CONNECT: Where I'll provide a clear, concise response based on that analysis.\n\nThis format will give transparency to how I develop health guidance while ensuring my final answer remains accessible. In my answer section, I'll use **bold text** for important terms and section titles to improve readability.\n\nPlease note that regardless of my analysis, I'll always maintain that I'm not a medical professional, and my information should not replace professional medical advice." }]
-      });
-    }
     // For other thinking models
-    else if (isThinkingModel) {
+    if (isThinkingModel) {
       initialHistory.push({
         role: "user",
         parts: [

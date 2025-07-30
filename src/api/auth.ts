@@ -800,6 +800,26 @@ export const initiatePayment = async (amount: number, duration: string, plain: s
  * @param {string[]} reasons - Reasons selected by the user for cancellation
  * @returns {Promise<Object>} Response message
  */
+// ------------------------------------
+// Subscription details
+// ------------------------------------
+export const getSubscriptionDetails = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Not authenticated');
+
+    const response = await fetch(`${API_URL}/payment/details`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch subscription details');
+    }
+    return data;
+};
+
 export const cancelSubscription = async (password: string, reasons: string[]) => {
     const token = localStorage.getItem('token');
 

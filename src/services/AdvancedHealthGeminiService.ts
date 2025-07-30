@@ -35,7 +35,7 @@ interface HealthAnalysisSection {
 export const analyzeAdvancedHealthData = async (
   combinedData: HealthData & Partial<AdvancedHealthData>, 
   apiKey: string,
-  modelType: GeminiModelType = "gemini-1.5-flash"
+  modelType: GeminiModelType = "gemini-2.5-flash-lite-preview-06-17"
 ): Promise<HealthAnalysisSection[]> => {
   if (!apiKey) {
     throw new Error("Please enable Gemini AI first by adding your API key");

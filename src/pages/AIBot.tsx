@@ -20,8 +20,8 @@ const AIBot = () => {
   const [useAI, setUseAI] = useState(!!geminiApiKey && geminiTier !== 'free');
   const [showModelSelector, setShowModelSelector] = useState(false);
   const [showSubscriptionDialog, setShowSubscriptionDialog] = useState(false);
-  const isThinkingModel = geminiModel.includes("thinking") || geminiModel === "gemini-2.5-pro-exp-03-25";
-  const isGemini25Pro = geminiModel === "gemini-2.5-pro-exp-03-25";
+  const isThinkingModel = geminiModel.includes("thinking");
+  const isGemini25Pro = false;
   const isFreeUser = geminiTier === 'free';
   const isPaidUser = geminiTier === 'lite' || geminiTier === 'pro';
   const navigate = useNavigate();

@@ -65,7 +65,7 @@ export interface NutritionAnalysis {
 export const analyzeNutrition = async (
   foodList: string,
   apiKey: string,
-  modelType: GeminiModelType = "gemini-1.5-flash"
+  modelType: GeminiModelType = "gemini-2.5-flash-lite-preview-06-17"
 ): Promise<NutritionAnalysis> => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
@@ -142,7 +142,7 @@ export const fetchNutritionPlanFromGemini = async (
   healthData: HealthData,
   allergies: string[],
   apiKey: string,
-  modelType: GeminiModelType = "gemini-1.5-flash"
+  modelType: GeminiModelType = "gemini-2.5-flash-lite-preview-06-17"
 ): Promise<NutritionPlan> => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
@@ -206,7 +206,7 @@ export const fetchRecipeFromGemini = async (
   mealIdea: string,
   allergies: string[],
   apiKey: string,
-  modelType: GeminiModelType = "gemini-1.5-flash"
+  modelType: GeminiModelType = "gemini-2.5-flash-lite-preview-06-17"
 ): Promise<Recipe> => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
@@ -258,7 +258,7 @@ export const fetchRecipeFromGemini = async (
 export const getFoodNutritionInfoFromGemini = async (
   foodName: string,
   apiKey: string,
-  modelType: GeminiModelType = "gemini-1.5-flash"
+  modelType: GeminiModelType = "gemini-2.5-flash-lite-preview-06-17"
 ): Promise<FoodNutritionInfo> => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
@@ -310,7 +310,7 @@ export const generateMealFromIngredients = async (
   servings: number,
   restrictions: string[],
   apiKey: string,
-  modelType: GeminiModelType = "gemini-1.5-flash"
+  modelType: GeminiModelType = "gemini-2.5-flash-lite-preview-06-17"
 ): Promise<MealIdeaFromIngredients> => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);

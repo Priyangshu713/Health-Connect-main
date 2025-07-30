@@ -27,7 +27,7 @@ export const analyzeWorkout = async (
     caloriesConsumed: number,
     bmrValue: number,
     apiKey: string,
-    modelType: GeminiModelType = "gemini-1.5-flash"
+    modelType: GeminiModelType = "gemini-2.5-flash-lite-preview-06-17"
 ): Promise<WorkoutAnalysis> => {
     try {
         const genAI = new GoogleGenerativeAI(apiKey);
