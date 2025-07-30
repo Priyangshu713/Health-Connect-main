@@ -9,7 +9,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bot, Zap, Cpu, Brain, Lock } from 'lucide-react';
+import { Bot, Sparkles, Zap, Cpu, Brain, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -34,7 +34,6 @@ const GEMINI_MODELS: GeminiModelOption[] = [
   },
 ];
 
-
 const ModelIcon = ({ model }: { model: GeminiModelType }) => {
   switch (model) {
     case "gemini-2.5-flash":
@@ -47,7 +46,6 @@ const ModelIcon = ({ model }: { model: GeminiModelType }) => {
       return <Bot className="h-5 w-5 text-health-lavender" />;
   }
 };
-
 
 const GeminiModelSelector: React.FC = () => {
   const { geminiApiKey, geminiModel, setGeminiModel, geminiTier } = useHealthStore();
@@ -123,7 +121,7 @@ const GeminiModelSelector: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 {GEMINI_MODELS.map((model) => (
-                  <SelectItem textValue={model.name} 
+                  <SelectItem 
                     key={model.id} 
                     value={model.id}
                     disabled={(model.isPremium && !isPremiumUser) || isFreeUser}
